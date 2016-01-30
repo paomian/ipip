@@ -1,0 +1,8 @@
+[package]
+name = "ipip"
+version = "0.1.0"
+authors = ["paomian <xpaomian@gmail.com>"]
+
+[dependencies]
+iron = "*"
+time = "*"
