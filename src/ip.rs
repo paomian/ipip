@@ -1,9 +1,8 @@
-extern crate iron;
-extern crate time;
-
+use iron::status;
 use iron::prelude::*;
 use iron::{BeforeMiddleware, AfterMiddleware, typemap};
 use time::precise_time_ns;
+use locate;
 
 struct ResponseTime;
 
@@ -27,7 +26,7 @@ impl AfterMiddleware for ResponseTime {
 fn hello_world(req: &mut Request) -> IronResult<Response> {
     let tmp = req.headers.get_raw("X-Real-IP").map(|x| {
         match String::from_utf8(x[0].clone()) {
-            Ok(o) =>  format!("Your IP is: {:?}",o),
+            Ok(o) =>  format!("Your IP is: {},{}",o,locate::locate(&o)),
             Err(e) => format!("Get Host error: {:?}",e),
         }
     });
@@ -46,12 +45,12 @@ fn hello_world(req: &mut Request) -> IronResult<Response> {
         println!("X-Forwarded-For: {:?}",tmp.join(","));
     });
     println!("Request: {:?}",resp);
-    Ok(Response::with((iron::status::Ok, resp)))
+    Ok(Response::with((status::Ok, resp)))
 }
 
 pub fn go() {
     let mut chain = Chain::new(hello_world);
-    chain.link_before(ResponseTime);
-    chain.link_after(ResponseTime);
+    //chain.link_before(ResponseTime);
+    //chain.link_after(ResponseTime);
     let _ = Iron::new(chain).http("localhost:3000");
 }

@@ -6,3 +6,4 @@ authors = ["paomian <xpaomian@gmail.com>"]
 [dependencies]
 iron = "*"
 time = "*"
+hyper = "*"
