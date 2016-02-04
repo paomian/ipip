@@ -20,13 +20,23 @@ impl AfterMiddleware for ResponseTime {
     fn after(&self, req: &mut Request, res: Response) -> IronResult<Response> {
         let delta = precise_time_ns() - *req.extensions.get::<ResponseTime>().unwrap();
         println!("Request took: {} ms", (delta as f64) / 1000000.0);
-        println!("Request: {:?}",req);
         Ok(res)
     }
 }
 
-fn hello_world(_: &mut Request) -> IronResult<Response> {
-    Ok(Response::with((iron::status::Ok, "Hello World")))
+fn hello_world(req: &mut Request) -> IronResult<Response> {
+    let tmp = req.headers.get_raw("X-Real-IP").map(|x| {
+        match String::from_utf8(x[0].clone()) {
+            Ok(o) =>  format!("Your IP is: {:?}",o),
+            Err(e) => format!("Get Host error: {:?}",e),
+        }
+    });
+    let resp = match tmp {
+        Some(x) => x,
+        None => String::from("HaHa"),
+    };
+    println!("Request: {:?}",resp);
+    Ok(Response::with((iron::status::Ok, resp)))
 }
 
 pub fn go() {
