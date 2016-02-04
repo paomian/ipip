@@ -35,6 +35,16 @@ fn hello_world(req: &mut Request) -> IronResult<Response> {
         Some(x) => x,
         None => String::from("HaHa"),
     };
+    let _ = req.headers.get_raw("X-Forwarded-For").map(|x| {
+        let mut tmp:Vec<String> = vec![];
+        for i in x {
+            match String::from_utf8(i.clone()) {
+                Ok(o) => tmp.push(o),
+                _ => println!("我就是牛逼!!!!!"),
+            }
+        }
+        println!("X-Forwarded-For: {:?}",tmp.join(","));
+    });
     println!("Request: {:?}",resp);
     Ok(Response::with((iron::status::Ok, resp)))
 }
