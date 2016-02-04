@@ -14,8 +14,7 @@ pub fn locate(s:&str) -> String {
         .header(Connection::keep_alive())
         .send().map(|mut res|{
             match res.status {
-                hyper::Ok => {res.read_to_end(&mut body);},
-                //_ => body = "Oh".into_bytes(),
+                hyper::Ok => {let _ = res.read_to_end(&mut body);},
                 _ => body = String::from("Oh").into_bytes(),
             }
         });

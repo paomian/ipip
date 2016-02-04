@@ -5,6 +5,8 @@ use iron::status;
 use iron::prelude::*;
 use iron::{BeforeMiddleware, AfterMiddleware, typemap};
 use time::precise_time_ns;
+use router::Router;
+
 use locate;
 
 struct ResponseTime;
@@ -28,7 +30,7 @@ impl AfterMiddleware for ResponseTime {
 
 fn hello_world(req: &mut Request) -> IronResult<Response> {
     let ct = Header(ContentType(Mime(TopLevel::Text, SubLevel::Plain,
-                         vec![(Attr::Charset, Value::Utf8)])));
+                                     vec![(Attr::Charset, Value::Utf8)])));
     let tmp = req.headers.get_raw("X-Real-IP").map(|x| {
         match String::from_utf8(x[0].clone()) {
             Ok(o) =>  format!("Your IP is: {},{}",o,locate::locate(&o)),
@@ -54,9 +56,7 @@ fn hello_world(req: &mut Request) -> IronResult<Response> {
 }
 
 pub fn go() {
-    let mut chain = Chain::new(hello_world);
-    //chain.link_before(ResponseTime);
-    //chain.link_after(ResponseTime);
-
-    let _ = Iron::new(chain).http("localhost:3000");
+    let mut router = Router::new();
+    router.get("/", hello_world);
+    let _ = Iron::new(router).http("localhost:3000");
 }
