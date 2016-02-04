@@ -1,3 +1,4 @@
+use iron;
 use iron::status;
 use iron::prelude::*;
 use iron::{BeforeMiddleware, AfterMiddleware, typemap};
@@ -24,6 +25,8 @@ impl AfterMiddleware for ResponseTime {
 }
 
 fn hello_world(req: &mut Request) -> IronResult<Response> {
+    let i_headers:iron::Headers = iron::Headers::new();
+    i_headers.set_raw("Content-Type",vec![b"text/html; charset=utf-8".to_vec()]);
     let tmp = req.headers.get_raw("X-Real-IP").map(|x| {
         match String::from_utf8(x[0].clone()) {
             Ok(o) =>  format!("Your IP is: {},{}",o,locate::locate(&o)),
@@ -45,12 +48,13 @@ fn hello_world(req: &mut Request) -> IronResult<Response> {
         println!("X-Forwarded-For: {:?}",tmp.join(","));
     });
     println!("Request: {:?}",resp);
-    Ok(Response::with((status::Ok, resp)))
+    Ok(Response::with((status::Ok, resp, (i_headers as iron::Headers))))
 }
 
 pub fn go() {
     let mut chain = Chain::new(hello_world);
     //chain.link_before(ResponseTime);
     //chain.link_after(ResponseTime);
+
     let _ = Iron::new(chain).http("localhost:3000");
 }
