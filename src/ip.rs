@@ -23,7 +23,7 @@ impl BeforeMiddleware for ResponseTime {
 impl AfterMiddleware for ResponseTime {
     fn after(&self, req: &mut Request, res: Response) -> IronResult<Response> {
         let delta = precise_time_ns() - *req.extensions.get::<ResponseTime>().unwrap();
-        println!("Request took: {} ms", (delta as f64) / 1000000.0);
+        info!("Request took: {} ms", (delta as f64) / 1000000.0);
         Ok(res)
     }
 }
@@ -46,12 +46,12 @@ fn hello_world(req: &mut Request) -> IronResult<Response> {
         for i in x {
             match String::from_utf8(i.clone()) {
                 Ok(o) => tmp.push(o),
-                _ => println!("我就是牛逼!!!!!"),
+                _ => error!("我就是牛逼!!!!!"),
             }
         }
-        println!("X-Forwarded-For: {}",tmp.join(","));
+        info!("X-Forwarded-For: {}",tmp.join(","));
     });
-    println!("Request: {}",resp);
+    info!("Request: {}",resp);
     Ok(Response::with((status::Ok, resp, ct)))
 }
 

@@ -21,7 +21,7 @@ pub fn locate(s:&str) -> String {
     let _ = match String::from_utf8(body) {
         Ok(o) => return o,
         Err(e) => {
-            println!("{:?}",e);
+            error!("{:?}",e);
             return String::from("Oh");
         },
     };

@@ -8,3 +8,11 @@ iron = "*"
 time = "*"
 hyper = "*"
 router = "*"
+
+[dependencies.log]
+version = "*"
+path = "log"
+
+[dependencies.env_logger]
+version = "*"
+path = "log/env"
