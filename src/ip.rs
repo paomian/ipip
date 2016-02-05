@@ -49,9 +49,9 @@ fn hello_world(req: &mut Request) -> IronResult<Response> {
                 _ => println!("我就是牛逼!!!!!"),
             }
         }
-        println!("X-Forwarded-For: {:?}",tmp.join(","));
+        println!("X-Forwarded-For: {}",tmp.join(","));
     });
-    println!("Request: {:?}",resp);
+    println!("Request: {}",resp);
     Ok(Response::with((status::Ok, resp, ct)))
 }
 
