@@ -40,7 +40,7 @@ fn hello_world(req: &mut Request) -> IronResult<Response> {
         Some(x) => match String::from_utf8(x[0].clone()) {
             Ok(o) =>  {
                 d.insert(String::from("ip"), o.to_json());
-                d.insert(String::from("locate"), locate::locate(&o).to_json());
+                d.insert(String::from("locate"), locate::locate(&o));
                 d.insert(String::from("error"), Json::Null);
                 d
             },

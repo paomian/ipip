@@ -3,8 +3,9 @@ use std::io::Read;
 use hyper;
 use hyper::Client;
 use hyper::header::Connection;
+use rustc_serialize::json::Json;
 
-pub fn locate(s:&str) -> String {
+pub fn locate(s:&str) -> Json {
 
     let client = Client::new();
 
@@ -19,10 +20,18 @@ pub fn locate(s:&str) -> String {
             }
         });
     let _ = match String::from_utf8(body) {
-        Ok(o) => return o,
+        Ok(o) => {
+            match Json::from_str(&o) {
+                Ok(data) => return data,
+                Err(e) => {
+                    error!("{:?}",e);
+                    return Json::Null;
+                },
+            }
+        },
         Err(e) => {
             error!("{:?}",e);
-            return String::from("Oh");
+            return Json::Null;
         },
     };
 }
