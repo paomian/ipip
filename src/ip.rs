@@ -9,6 +9,10 @@ use router::Router;
 
 use locate;
 
+use std::collections::BTreeMap;
+//use rustc_serialize::json::{self, Json};
+use rustc_serialize::json::{Json, ToJson};
+
 struct ResponseTime;
 
 impl typemap::Key for ResponseTime { type Value = u64; }
@@ -29,17 +33,29 @@ impl AfterMiddleware for ResponseTime {
 }
 
 fn hello_world(req: &mut Request) -> IronResult<Response> {
-    let ct = Header(ContentType(Mime(TopLevel::Text, SubLevel::Plain,
+    let ct = Header(ContentType(Mime(TopLevel::Application, SubLevel::Json,
                                      vec![(Attr::Charset, Value::Utf8)])));
+    let mut d = BTreeMap::new();
     let tmp = req.headers.get_raw("X-Real-IP").map(|x| {
         match String::from_utf8(x[0].clone()) {
-            Ok(o) =>  format!("Your IP is: {},{}",o,locate::locate(&o)),
-            Err(e) => format!("Get Host error: {:?}",e),
+            Ok(o) =>  {
+                d.insert(String::from("ip"), o.to_json());
+                d.insert(String::from("locate"), locate::locate(&o).to_json());
+                d.insert(String::from("error"), Json::Null);
+                d
+                //format!("Your IP is: {},{}",o,locate::locate(&o));
+            },
+            Err(e) => {
+                d.insert(String::from("error"),format!("Get Host error: {:?}",e).to_json());
+                d
+                //format!("Get Host error: {:?}",e)
+            },
         }
     });
+    let mut error = BTreeMap::new();
     let resp = match tmp {
         Some(x) => x,
-        None => String::from("HaHa"),
+        None => {error.insert(String::from("error"),"HaHa".to_json());error},
     };
     let _ = req.headers.get_raw("X-Forwarded-For").map(|x| {
         let mut tmp:Vec<String> = vec![];
@@ -51,8 +67,11 @@ fn hello_world(req: &mut Request) -> IronResult<Response> {
         }
         info!("X-Forwarded-For: {}",tmp.join(","));
     });
-    info!("Request: {}",resp);
-    Ok(Response::with((status::Ok, resp, ct)))
+    let resp_json = Json::Object(resp).to_string();
+    info!("Request: {}",resp_json);
+    Ok(Response::with((status::Ok,
+                       resp_json,
+                       ct)))
 }
 
 pub fn go() {

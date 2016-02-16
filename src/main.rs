@@ -2,6 +2,7 @@ extern crate iron;
 extern crate time;
 extern crate hyper;
 extern crate router;
+extern crate rustc_serialize;
 
 #[macro_use]
 extern crate log;
