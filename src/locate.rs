@@ -19,7 +19,7 @@ pub fn locate(s:&str) -> Json {
                 _ => body = String::from("Oh").into_bytes(),
             }
         });
-    let _ = match String::from_utf8(body) {
+    let _ = match String::from_utf8(body.clone()) {
         Ok(o) => {
             match Json::from_str(&o) {
                 Ok(data) => return data,
@@ -30,7 +30,7 @@ pub fn locate(s:&str) -> Json {
             }
         },
         Err(e) => {
-            error!("{:?}",e);
+            error!("Parse Vec to String error {:?}:{:?}",e,body);
             return Json::Null;
         },
     };
