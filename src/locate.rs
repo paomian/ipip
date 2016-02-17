@@ -24,7 +24,7 @@ pub fn locate(s:&str) -> Json {
             match Json::from_str(&o) {
                 Ok(data) => return data,
                 Err(e) => {
-                    error!("{:?}",e);
+                    error!("Parse String to Json error {:?}:{:?}",e,&o);
                     return Json::String(String::from("Your IP is zhale!"));
                 },
             }
