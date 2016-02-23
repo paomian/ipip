@@ -10,9 +10,14 @@ extern crate env_logger;
 
 mod ip;
 mod locate;
+mod irc;
+
+use std::thread;
 
 fn main() {
     let _ = env_logger::init();
     info!("Hello World");
+    let _ = thread::spawn(irc::irc_bot);
+    info!("IRC Server started");
     ip::go();
 }
