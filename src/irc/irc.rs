@@ -34,7 +34,7 @@ pub fn irc_bot() {
                 let _ = buf.flush();
             }
         }
-        info!("Get data {}",data);
+        info!("Get data {}",&data[..data.len()-1]);
         data = String::from("");
     }
 }
