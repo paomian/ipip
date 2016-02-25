@@ -6,7 +6,6 @@ use bufstream::BufStream;
 pub fn irc_bot() {
     info!("Starting IRC Server");
     let server = "irc.freenode.net:6667";
-    //let server = "localhost:4242";
     let nick_name = String::from("NICK BB88\r\n").into_bytes();
     let gecos = String::from("USER Bot * 8 :BB88\r\n").into_bytes();
     let channel = String::from("JOIN #sdut\r\n").into_bytes();
@@ -23,7 +22,7 @@ pub fn irc_bot() {
     loop {
         let _ = buf.read_line(&mut data);
         if data.starts_with("PING") {
-            buf.write(&["PONG ", &data[5..]].concat().into_bytes());
+            let _ = buf.write(&["PONG ", &data[5..]].concat().into_bytes());
             let _ = buf.flush();
         } else {
             let tmp:Vec<&str> = data.split(':').collect();
