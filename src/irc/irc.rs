@@ -6,8 +6,8 @@ use bufstream::BufStream;
 pub fn irc_bot() {
     info!("Starting IRC Server");
     let server = "irc.freenode.net:6667";
-    let nick_name = String::from("NICK BB88\r\n").into_bytes();
-    let gecos = String::from("USER Bot * 8 :BB88\r\n").into_bytes();
+    let nick_name = String::from("NICK BBit\r\n").into_bytes();
+    let gecos = String::from("USER Bot * 8 :BBit\r\n").into_bytes();
     let channel = String::from("JOIN #sdut\r\n").into_bytes();
     let mut stream = match TcpStream::connect(server) {
         Ok(s) => s,
@@ -26,7 +26,7 @@ pub fn irc_bot() {
             let _ = buf.flush();
         } else {
             let tmp:Vec<&str> = data.split(':').collect();
-            if tmp.len() == 4 && tmp[2] == "BB88" {
+            if tmp.len() == 4 && tmp[2] == "BBit" {
                 let msg = &tmp[3][1..];
                 let who = tmp[1].splitn(2, '!').collect::<Vec<&str>>()[0];
                 let commond = ["PRIVMSG #sdut :", who, ":你说的是：",msg].concat();
