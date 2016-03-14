@@ -18,7 +18,9 @@ use std::thread;
 fn main() {
     let _ = env_logger::init();
     info!("Hello World");
-    let _ = thread::spawn(irc::irc::irc_bot);
+    let _ = thread::Builder::new()
+        .name(String::from("IRC BOT"))
+        .spawn(irc::irc::irc_bot);
     info!("IRC Server started");
     ip::go();
 }
