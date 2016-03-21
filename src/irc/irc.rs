@@ -1,6 +1,8 @@
 use std::io::prelude::*;
 use std::net::TcpStream;
 use std::fs::File;
+use std::fs::OpenOptions;
+use time;
 
 use bufstream::BufStream;
 
@@ -12,35 +14,40 @@ fn now() -> String {
 }
 
 fn open_file(log_name:&str) -> Option<File> {
-    let file:Option<File> = match File::open(log_name) {
-        Ok(f) => Some(f),
-        Err(e) => {
-            error!("Open file error:{:?}",e);
-            match File::create(log_name) {
-                Ok(f) => Some(f),
-                Err(e) => {
-                    error!("Create file error:{:?}",e);
-                    None
-                }
+    match OpenOptions::new()
+        .append(true)
+        .write(true)
+        .create(true)
+        .open(log_name) {
+            Ok(f) => Some(f),
+            Err(e) => {
+                error!("Open file error:{:?}",e);
+                None
             }
         }
-    }
 }
 
-fn chat_log(s:&String,f:Option<File>, who:&String){
-    let mut new_msg = String::new();
-    if s.chars().last() != Some('\n') {
-        new_msg = s.push('\n');
+fn chat_log(s:&str,f:&mut Option<File>, who:&str,to:Option<&str>) {
+    let mut new_msg = String::from(s);
+    if s.chars().last() == Some('\n') {
+        let _ = new_msg.pop();
     }
-
-    new_msg = [&now()," ", who, " Say:", &new_msg].concat();
-
-    if let Some(f) = file {
-        f.write(new_msg.as_bytes());
+    if let Some(t) = to {
+        new_msg = [&now()[..]," ", who, " Say:[", &new_msg[..],"] to ",t,"\n"]
+            .concat();
     } else {
-        info!(new_msg);
+        new_msg = [&now()[..]," ", &who[..], " Say:[", &new_msg[..],"]\n"]
+            .concat();
     }
 
+    if let &mut Some(ref mut file) = f {
+        match file.write(new_msg.as_bytes()) {
+            Ok(_) => {},
+            Err(e) => error!("{:?}",e),
+        }
+    } else {
+        error!("write file faild {}",new_msg);
+    }
 }
 
 pub fn irc_bot() {
@@ -59,7 +66,7 @@ pub fn irc_bot() {
     let _ = buf.write(&channel);
     let _ = buf.flush();
     let mut data = String::new();
-    let log = open_file("chat.log");
+    let mut log_file = open_file("chat.log");
     loop {
         let _ = buf.read_line(&mut data);
         if data.starts_with("PING") {
@@ -68,14 +75,19 @@ pub fn irc_bot() {
         } else {
             let tmp:Vec<&str> = data.split(':').collect();
             let who = tmp[1].splitn(2, '!').collect::<Vec<&str>>()[0];
-            if tmp.len() == 4 && tmp[2] == "BBit" {
-                let msg = &tmp[3][1..];
-                let commond = ["PRIVMSG #sdut :", who, ":你说的是：",msg].concat();
-                let _ = buf.write(&commond.into_bytes());
-                let _ = buf.flush();
+            let mut msg = "";
+            if tmp.len() == 4 {
+                msg = &tmp[3][1..];
+                if tmp[2] == "BBit" {
+                    let commond = ["PRIVMSG #sdut :", who, ":你说的是：",msg].concat();
+                    let _ = buf.write(&commond.into_bytes());
+                    let _ = buf.flush();
+                } else {
+                    chat_log(msg,&mut log_file,who,Some(tmp[2]));
+                }
             } else if tmp.len() == 3 {
-                let msg = &tmp[3];
-
+                let msg = &tmp[2];
+                chat_log(msg,&mut log_file,who,None);
             }
         }
         info!("Get data {}",&data[..data.len()-1]);
