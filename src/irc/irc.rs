@@ -31,6 +31,7 @@ fn chat_log(s:&str,f:&mut Option<File>, who:&str,to:Option<&str>) {
     let mut new_msg = String::from(s);
     if s.chars().last() == Some('\n') {
         let _ = new_msg.pop();
+        let _ = new_msg.pop();
     }
     if let Some(t) = to {
         new_msg = [&now()[..]," ", who, " Say:[", &new_msg[..],"] to ",t,"\n"]
