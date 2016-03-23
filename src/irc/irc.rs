@@ -70,15 +70,16 @@ pub fn irc_bot() {
     let mut log_file = open_file("chat.log");
     loop {
         let _ = buf.read_line(&mut data);
+        info!("Get data {}",&data[..data.len()-1]);
         if data.starts_with("PING") {
             let _ = buf.write(&["PONG ", &data[5..]].concat().into_bytes());
             let _ = buf.flush();
         } else {
-            let tmp:Vec<&str> = data.split(':').collect();
+            let tmp:Vec<&str> = data.splitn(4, ':').collect();
             let who = tmp[1].splitn(2, '!').collect::<Vec<&str>>()[0];
             let mut msg = "";
-            if tmp.len() == 4 {
-                msg = &tmp[3][1..];
+            if tmp.len() >= 4 {
+                msg = &tmp[3];
                 if tmp[2] == "BBit" {
                     let commond = ["PRIVMSG #sdut :", who, ":你说的是：",msg].concat();
                     let _ = buf.write(&commond.into_bytes());
@@ -91,7 +92,6 @@ pub fn irc_bot() {
                 chat_log(msg,&mut log_file,who,None);
             }
         }
-        info!("Get data {}",&data[..data.len()-1]);
         data = String::from("");
     }
 }
