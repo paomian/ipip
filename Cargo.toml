@@ -8,6 +8,7 @@ iron = "*"
 time = "*"
 hyper = "*"
 router = "*"
+clippy = "*"
 rustc-serialize = "0.3"
 bufstream = "0.1"
 

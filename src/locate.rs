@@ -1,6 +1,5 @@
 use std::io::Read;
 
-use hyper;
 use hyper::Client;
 use hyper::header::{Connection,UserAgent};
 use rustc_serialize::json::Json;
@@ -15,12 +14,9 @@ pub fn locate(s:&str) -> Json {
         .header(Connection::keep_alive())
         .header(UserAgent(String::from("Something")))
         .send().map(|mut res|{
-            match res.status {
-                hyper::Ok => {let _ = res.read_to_end(&mut body);},
-                _ => {let _ = res.read_to_end(&mut body);},
-            }
+            res.read_to_end(&mut body)
         });
-    let _ = match String::from_utf8(body.clone()) {
+    match String::from_utf8(body.clone()) {
         Ok(o) => {
             match Json::from_str(&o) {
                 Ok(data) => return data,

@@ -1,3 +1,6 @@
+#![feature(plugin)]
+#![plugin(clippy)]
+
 extern crate iron;
 extern crate time;
 extern crate hyper;

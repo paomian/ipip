@@ -41,7 +41,7 @@ fn chat_log(s:&str,f:&mut Option<File>, who:&str,to:Option<&str>) {
             .concat();
     }
 
-    if let &mut Some(ref mut file) = f {
+    if let Some(ref mut file) = *f {
         match file.write(new_msg.as_bytes()) {
             Ok(_) => {},
             Err(e) => error!("{:?}",e),
@@ -77,7 +77,7 @@ pub fn irc_bot() {
         } else {
             let tmp:Vec<&str> = data.splitn(4, ':').collect();
             let who = tmp[1].splitn(2, '!').collect::<Vec<&str>>()[0];
-            let mut msg = "";
+            let msg:&str;
             if tmp.len() >= 4 {
                 msg = &tmp[3];
                 if tmp[2] == "BBit" {
